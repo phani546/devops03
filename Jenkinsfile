@@ -39,13 +39,11 @@ pipeline {
 		}
         stage('Push Docker Image'){
 			steps{
-				container('docker'){
-					script {
+				script {
 						docker.withRegistry('https://devops0001.jfrog.io', 'devops0001.jfrog.io' ) {
 							sh "docker push devops0001.jfrog.io/helloworld:latest"
 						}
 					}
-			   }
 			}
 		}
 	}
