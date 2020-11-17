@@ -1,0 +1,33 @@
+pipeline {
+   agent any
+   environment {
+    dockerImage = '' 
+     }
+   
+   stages {
+      stage('Checkout') {
+         steps {
+            // Get some code from a GitHub repository enviroment specified branch name given during the build
+            git credentialsId: 'github', url: 'https://github.com/phani546/devops-1.git', branch:'$BRANCH'
+			
+         }
+     }
+
+		stage('Build Docker Image'){
+            steps{
+            //Jfrog url+reponame+imagename+ Tag (tag name will be enviroment + branch+ buildnumber.)
+			   sh "docker build -t devops0001.jfrog.io/omini-repo/ominiapp:$ENVIRONMENT-$BRANCH-$BUILD_NUMBER ."
+		    }
+		}
+        stage('Push Docker Image'){
+			steps{
+				script {
+        //Push the docker image to repo.
+						docker.withRegistry('https://devops0001.jfrog.io', 'devops0001.jfrog.io' ) {
+							sh "docker push devops0001.jfrog.io/omini-repo/ominiapp:$ENVIRONMENT-$BRANCH-$BUILD_NUMBER"
+						}
+					}
+			}
+		}
+   }
+}
