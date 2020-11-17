@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld
+spec:
+  selector:
+    matchLabels:
+      app: helloworld
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      restartPolicy: Always
+      containers:
+        - name : helloworld-container
+          image: psn546/helloworld-new:latest
+          imagePullPolicy: Always
+          env:
+            - name: CONFIG_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: hwpropertiesv1
+                  key: configusername
+            - name: CONFIG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hwpropertiesv1
+                  key: configpassword
+          ports:
+            - name: liveness-port
+              containerPort: 8090
+              hostPort: 8090
+          volumeMounts:
+            - mountPath: "/config"
+              name: config-data-volume
+          startupProbe:
+            httpGet:
+              path: /helloworld/health
+              port: liveness-port
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /helloworld/health
+              port: liveness-port
+            initialDelaySeconds: 5
+            periodSeconds: 5 
+          livenessProbe:
+            httpGet:
+              path: /helloworld/health
+              port: liveness-port
+            initialDelaySeconds: 5
+            periodSeconds: 5      
+      volumes:
+        - name: config-data-volume
+          configMap:
+            name: hello-world-app
+            items:
+              - key: application-sbx.properties
+                path: application-sbx.properties
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: helloworld
+  name: helloworld
+  namespace: default
+spec:
+  ports:
+    - port: 8090
+      protocol: TCP
+      targetPort: 8090
+  selector:
+    app: helloworld
+  sessionAffinity: None
+  type: NodePort
