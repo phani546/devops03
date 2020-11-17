@@ -34,22 +34,20 @@ pipeline {
 		}
 		stage('Build Docker Image'){
             steps{
-			   script{
-			    dockerImage = docker.build("psn546/helloworld-new:${env.BUILD_TAG}")
-			   }
+			   sh "docker build -t devops0001.jfrog.io/helloworld:latest ."
 		    }
 		}
         stage('Push Docker Image'){
 			steps{
-				script{
-					docker.withRegistry('','dockerhub') {
-					  dockerImage.push();
-					  dockerImage.push('latest');
+				container('docker'){
+					script {
+						docker.withRegistry('https://devops0001.jfrog.io', 'devops0001.jfrog.io' ) {
+							sh "docker push devops0001.jfrog.io/helloworld:latest"
+						}
 					}
-				}
+			   }
 			}
 		}
-
 	}
 	post{
 		always{
