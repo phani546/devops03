@@ -34,14 +34,14 @@ pipeline {
 		}
 		stage('Build Docker Image'){
             steps{
-			   sh "docker build -t devops0001.jfrog.io/ois-release/helloworld:latest ."
+			   sh "docker build -t devops0001.jfrog.io/ois-release-docker/helloworld:latest ."
 		    }
 		}
         stage('Push Docker Image'){
 			steps{
 				script {
 						docker.withRegistry('https://devops0001.jfrog.io', 'devops0001.jfrog.io' ) {
-							sh "docker push devops0001.jfrog.io/ois-release/helloworld:latest"
+							sh "docker push devops0001.jfrog.io/ois-release-docker/helloworld:latest"
 						}
 					}
 			}
